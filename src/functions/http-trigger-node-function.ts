@@ -4,24 +4,40 @@ import { pbkdf2 } from "node:crypto";
 
 const start = Date.now();
 
+const availableParallelismCount = availableParallelism();
+
 export const  httpTrigger = async(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit>=> {
-    context.log(`Http function processed request for url "${request.url}"`);
+    
+    try{
+        context.log(`Http function processed request for url "${request.url}"`);
 
-    context.log(`Available parallelism ${availableParallelism}`)
+        const promises = [];
 
-    doHash(context)
-    doHash(context);
+        context.log(`Available parallelism ${availableParallelism()}`);
 
-    const name = request.query.get('name') || await request.text() || 'world';
+        for(let i = 0; i<availableParallelismCount; i++){
+            promises.push(doHash());
+        }
+       
+        const value = await Promise.all(promises);
 
-    return { body: `Hello, ${name}!` };
+        context.log(value);
+        
+        const name = request.query.get('name') || await request.text() || 'world';
+    
+        return { body: `Hello, ${name}!` };
+    }catch(error){
+        context.error('Error while making request!');
+    }
+    
+   
 };
 
-const doHash = (context:InvocationContext)=>{
-    pbkdf2('a','b',100000,512,'sha512',()=>{
-        context.log('Hash:', Date.now()-start);
-    })
-}
+const doHash = ()=>new Promise((resolve , _reject)=>{
+        pbkdf2('a','b',100000,512,'sha512',()=>{
+            resolve('Hash: '+(Date.now()-start));
+        })
+});
 
 app.http('http-trigger-node-function', {
     methods: ['GET', 'POST'],

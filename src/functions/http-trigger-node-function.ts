@@ -15,7 +15,7 @@ export const  httpTrigger = async(request: HttpRequest, context: InvocationConte
 
         context.log(`Available parallelism ${availableParallelismCount}`);
 
-        for(let i = 0; i< 100; i++){
+        for(let i = 0; i< 25; i++){
             promises.push(doHash(start));
         }
        

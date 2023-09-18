@@ -25,7 +25,7 @@ export const  httpTrigger = async(request: HttpRequest, context: InvocationConte
 
         const name = request.query.get('name') || await request.text() || 'world';
 
-        context.log(`Function took ${Date.now() - start} `)
+        context.log(`Function invocation id ${context.invocationId} took ${Date.now() - start} `)
     
         return { body: `Hello, ${name}!` };
     }catch(error){

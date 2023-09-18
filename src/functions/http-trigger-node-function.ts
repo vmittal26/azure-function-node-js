@@ -9,7 +9,7 @@ export const  httpTrigger = async(request: HttpRequest, context: InvocationConte
     
     try{
         const start = Date.now();
-        context.log(`Http function processed request for url "${request.url}"`);
+        context.log(`Started function for ${context.invocationId} at ${(new Date())}`);
 
         const promises = [];
 

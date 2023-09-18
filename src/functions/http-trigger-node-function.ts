@@ -1,5 +1,5 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
-import { availableParallelism } from "node:os";
+import { availableParallelism , cpus} from "node:os";
 import { pbkdf2 } from "node:crypto";
 
 
@@ -9,14 +9,14 @@ export const  httpTrigger = async(request: HttpRequest, context: InvocationConte
     
     try{
         const start = Date.now();
-        context.log(`Http function processed request for url "${request.url}"`);
+        context.log(`Http function processed request for url "${request}"`);
 
         const promises = [];
 
         context.log(`Available parallelism ${availableParallelismCount}`);
 
         for(let i = 0; i< availableParallelismCount; i++){
-            promises.push(doHash(start));
+            promises.push(doHash());
         }
        
         const value = await Promise.all(promises);
@@ -35,7 +35,8 @@ export const  httpTrigger = async(request: HttpRequest, context: InvocationConte
    
 };
 
-const doHash = (start: number)=>new Promise((resolve , _reject)=>{
+const doHash = ()=>new Promise((resolve , _reject)=>{
+       const start = Date.now();
         pbkdf2('a','b',100000,512,'sha512',()=>{
             resolve('Hash: '+(Date.now()-start));
         })

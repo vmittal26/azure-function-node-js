@@ -32,7 +32,7 @@ export const  httpTrigger = async(request: HttpRequest, context: InvocationConte
     
         return { body: `Hello, ${name}!` };
     }catch(error){
-        context.error('Error while making request!');
+        context.error('Error while making request!', error);
     }
     
    

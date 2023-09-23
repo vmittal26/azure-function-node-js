@@ -41,4 +41,4 @@ jobs:
           app-name: 'azure-node-function-app'
           slot-name: 'Production'
           package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_D0CE559019904B1D97598F2A06EC8D62 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_ABEF3B76B432493687F5A85948AE7AB0 }}

@@ -2,6 +2,7 @@ import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/fu
 import { availableParallelism , cpus} from "node:os";
 import { pbkdf2 } from "node:crypto";
 import {readFileSync} from 'node:fs';
+import {FilesManager} from 'turbodepot-node';
 
 
 const availableParallelismCount = availableParallelism();
@@ -16,7 +17,9 @@ export const  httpTrigger = async(request: HttpRequest, context: InvocationConte
 
         context.log(`Available parallelism ${availableParallelismCount}`);
 
-        readFile(context);
+        const filesManager = new FilesManager();
+
+        readFile(context, filesManager);
 
         // for(let i = 0; i< availableParallelismCount; i++){
         //     promises.push(doHash());
@@ -38,23 +41,44 @@ export const  httpTrigger = async(request: HttpRequest, context: InvocationConte
    
 };
 
-const readFile = (context:InvocationContext)=>{
-    for (let i = 1; i <= 2; i++) {
+const readFile = (context:InvocationContext , filesManager)=>{
+    try{
+        const outputPath = __dirname + '/result.txt';
+        let inputPathList = [];
 
-        context.log('read file');
-        const memoryData = process.memoryUsage();
-        const formatMemoryUsage = (data:any) => `${Math.round(data / 1024 / 1024 * 100) / 100} MB`;
+         for(let i = 0;i < 10000;i++){
+            inputPathList.push( __dirname + '/sample_file.txt');
+         }
+
+         filesManager.mergeFiles(inputPathList,outputPath);
+
+         inputPathList = [];
+
+         for(let i = 0;i < 15000;i++){
+            inputPathList.push( __dirname + '/sample_file.txt');
+         }
+
+         filesManager.mergeFiles(inputPathList,outputPath);
+         
+
+        for(let i=0; i< 10 ;i++){
+            const memoryData = process.memoryUsage();
+            const formatMemoryUsage = (data) => `${Math.round(data / 1024 / 1024 * 100) / 100} MB`;
+        
+            const memoryUsage = {
+            rss: `${formatMemoryUsage( memoryData.rss )} -> Resident Set Size - total memory allocated for the process execution`,
+            heapTotal: `${formatMemoryUsage( memoryData.heapTotal )} -> total size of the allocated heap`,
+            heapUsed: `${formatMemoryUsage( memoryData.heapUsed )} -> actual memory used during the execution`,
+            external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
+            };
     
-        const memoryUsage = {
-          rss: `${formatMemoryUsage( memoryData.rss )} -> Resident Set Size - total memory allocated for the process execution`,
-          heapTotal: `${formatMemoryUsage( memoryData.heapTotal )} -> total size of the allocated heap`,
-          heapUsed: `${formatMemoryUsage( memoryData.heapUsed )} -> actual memory used during the execution`,
-          external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
-        };
-        readFileSync('25MB.bin', 'utf-8');
-      
-        context.log(memoryUsage);
-      }
+            readFileSync(outputPath, 'utf-8');
+            context.log(memoryUsage);
+
+        }
+    }catch(error){
+        console.error(error);
+    }
 }
 
 const doHash = ()=>new Promise((resolve , _reject)=>{

@@ -1,7 +1,7 @@
 import { app, HttpRequest, HttpResponseInit, InvocationContext } from "@azure/functions";
 import { availableParallelism , cpus} from "node:os";
 import { pbkdf2 } from "node:crypto";
-import {readFileSync} from 'node:fs';
+import {readFileSync ,unlinkSync} from 'node:fs';
 import {FilesManager} from 'turbodepot-node';
 
 
@@ -43,7 +43,7 @@ export const  httpTrigger = async(request: HttpRequest, context: InvocationConte
 
 const readFile = (context:InvocationContext , filesManager)=>{
     try{
-        const outputPath = __dirname + '/result.txt';
+        const outputPath = `${__dirname} + '/result-${context.invocationId}.txt`;
         let inputPathList = [];
 
          for(let i = 0;i < 10000;i++){
@@ -73,6 +73,9 @@ const readFile = (context:InvocationContext , filesManager)=>{
             };
     
             readFileSync(outputPath, 'utf-8');
+
+            unlinkSync(outputPath)
+            
             context.log(memoryUsage);
 
         }
